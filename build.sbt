@@ -24,8 +24,9 @@ val slf4jnop = "org.slf4j" % "slf4j-nop" % "1.7.21" % Test
 lazy val root = (project in file("."))
   .settings(
     name := "kamon-jmx",
-    version := "1.0.2-SNAPSHOT",
-    crossScalaVersions := Seq("2.11.12", "2.12.8")
+    version := "1.0.3-SNAPSHOT",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8", "2.12.8")
   )
   .settings(
         organization := "com.github.BambooTuna",
