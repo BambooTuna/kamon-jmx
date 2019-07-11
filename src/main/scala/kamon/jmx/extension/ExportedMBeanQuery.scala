@@ -178,9 +178,12 @@ class ExportedMBeanQuery(
     import collection.JavaConverters._
     val names: Set[ObjectName] = getMBeanNames()
     log.debug("found JMX ObjectNames " + names)
+    println(s"sjmx: found JMX ObjectNames: $names")
     names.filterNot { name ⇒
+      println(s"sjmx: name: $name")
       monitoredBeanNames.exists(_.equals(name))
     }.foreach { name ⇒
+      println(s"sjmx: name#foreach: $name")
       val attrList: AttributeList =
         server.getAttributes(name, attributeNames)
       val attrs: Seq[Attribute] = attrList.asList().asScala
@@ -243,6 +246,7 @@ class ExportedMBean(
     implicit ec: ExecutionContext)
     extends GenericEntityRecorder(instrumentFactory) {
   println(s"sjmx: ExportedMBean#apply")
+  val counter = Kamon.metrics.counter("exported-mbean-counter")
 
   import ExportedMBean._
 
@@ -279,8 +283,9 @@ class ExportedMBean(
           val value: Long = toLong(attr.getValue())
           minMaxCounters(attrName).increment(value)
         } else if (gauges.contains(attrName)) {
-          println(s"sjmx: gatherMetrics#gauges")
           val value: Long = toLong(attr.getValue())
+          println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
+          counter.increment(value)
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
         }
