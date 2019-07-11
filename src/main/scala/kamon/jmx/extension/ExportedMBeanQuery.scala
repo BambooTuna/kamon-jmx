@@ -286,6 +286,7 @@ class ExportedMBean(
           val value: Long = toLong(attr.getValue())
           println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
           counter.increment(value)
+          Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
         }
@@ -351,14 +352,15 @@ class ExportedMBean(
     if (mdef.range.isDefined && !mdef.refreshInterval.isDefined) {
       gauge(mdef.name, mdef.unitOfMeasure, mdef.valueCollector.get)
     } else if (!mdef.range.isDefined) {
-      gauge(
-        mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
-        mdef.valueCollector.get)
-    } else if (!mdef.refreshInterval.isDefined) {
-      println(s"sjmx: makeGauge")
+      println(s"sjmx: makeGauge#mdef.range.isDefined")
 //      gauge(
-//        mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
+//        mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
+//        mdef.valueCollector.get)
       Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
+    } else if (!mdef.refreshInterval.isDefined) {
+      println(s"sjmx: makeGauge:mdef.refreshInterval.isDefined")
+      gauge(
+        mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
     } else {
       gauge(
         mdef.name, mdef.range.get, mdef.refreshInterval.get, mdef.unitOfMeasure,
