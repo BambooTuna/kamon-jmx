@@ -18,26 +18,19 @@ package kamon.jmx.extension
 
 import java.lang.Thread
 import java.lang.management.ManagementFactory
-import java.util.concurrent.{ Executors, ScheduledExecutorService, TimeUnit }
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import java.util.logging.Level
 
 import scala.concurrent.ExecutionContext
 import scala.collection.mutable.Buffer
 import scala.collection.immutable.Set
 import scala.concurrent.duration.FiniteDuration
-
-import akka.actor.{ Actor, ActorSystem, ExtendedActorSystem, Props }
+import akka.actor.{Actor, ActorSystem, ExtendedActorSystem, Props}
 import akka.event.Logging
-
 import javax.management._
-
-import com.typesafe.config.{ Config, ConfigValueType }
-
-import kamon.metric.{
-  GenericEntityRecorder,
-  MetricsModule,
-  EntityRecorderFactory
-}
+import com.typesafe.config.{Config, ConfigValueType}
+import kamon.Kamon
+import kamon.metric.{EntityRecorderFactory, GenericEntityRecorder, MetricsModule}
 import kamon.metric.SubscriptionsDispatcher.TickMetricSnapshot
 import kamon.metric.instrument._
 import kamon.metric.instrument.Gauge.CurrentValueCollector
@@ -348,8 +341,9 @@ class ExportedMBean(
         mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
         mdef.valueCollector.get)
     } else if (!mdef.refreshInterval.isDefined) {
-      gauge(
-        mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
+//      gauge(
+//        mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
+      Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
     } else {
       gauge(
         mdef.name, mdef.range.get, mdef.refreshInterval.get, mdef.unitOfMeasure,
