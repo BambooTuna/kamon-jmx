@@ -14,10 +14,22 @@
  */
 
 val kamonCore = "io.kamon" %% "kamon-core" % "0.6.7"
+val akkaActor = "com.typesafe.akka" %% "akka-actor" % "2.5.23"
+val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % "2.5.23" % Test
+val scalatest = "org.scalatest" %% "scalatest" % "3.0.1"
+
+val slf4jApi            = "org.slf4j" % "slf4j-api"        % "1.7.21"
+val slf4jnop = "org.slf4j" % "slf4j-nop" % "1.7.21" % Test
 
 lazy val root = (project in file("."))
-  .settings(name := "kamon-jmx")
   .settings(
-      libraryDependencies ++=
-        compileScope(kamonCore, akkaDependency("actor").value) ++
-        testScope(scalatest, akkaDependency("testkit").value, slf4jApi, slf4jnop))
+        name := "kamon-jmx",
+        version := "1.0.0-SNAPSHOT"
+  )
+  .settings(
+        organization := "com.github.BambooTuna",
+        publishTo := Some(Resolver.file("kamon-jmx",file("."))(Patterns(true, Resolver.mavenStyleBasePattern))),
+        libraryDependencies ++=
+          compileScope(kamonCore, akkaActor) ++
+            testScope(scalatest, slf4jApi)
+  )
