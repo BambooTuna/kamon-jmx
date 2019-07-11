@@ -1,3 +1,5 @@
+import Dependencies.Kamon
+
 /* =========================================================================================
  * Copyright © 2013-2016 the kamon project <http://kamon.io/>
  *
@@ -21,10 +23,24 @@ val scalatest = "org.scalatest" %% "scalatest" % "3.0.1"
 val slf4jApi            = "org.slf4j" % "slf4j-api"        % "1.7.21"
 val slf4jnop = "org.slf4j" % "slf4j-nop" % "1.7.21" % Test
 
+lazy val sample = (project in file("sample"))
+  .settings(
+    name := "kamon-jmx-sample",
+    version := "1.0.0-SNAPSHOT",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8", "2.12.8")
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      //kamonCore
+    ) ++ Kamon.allDependencies
+  )
+  .dependsOn(root)
+
 lazy val root = (project in file("."))
   .settings(
     name := "kamon-jmx",
-    version := "1.0.4-SNAPSHOT",
+    version := "1.0.5-SNAPSHOT",
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.11.8", "2.12.8")
   )
@@ -33,5 +49,8 @@ lazy val root = (project in file("."))
         publishTo := Some(Resolver.file("kamon-jmx",file("."))(Patterns(true, Resolver.mavenStyleBasePattern))),
         libraryDependencies ++=
           compileScope(kamonCore, akkaActor) ++
-            testScope(scalatest, slf4jApi)
+            testScope(scalatest, slf4jApi) ++
+          Seq(
+            akkaTestkit
+        )
   )

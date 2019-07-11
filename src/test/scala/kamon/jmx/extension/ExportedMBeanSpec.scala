@@ -17,14 +17,10 @@
 package kamon.jmx.extension
 
 import java.lang.management.ManagementFactory
-import javax.management.{ MBeanServer, ObjectName }
 
-import kamon.jmx.extension._
+import javax.management.{MBeanServer, ObjectName}
 import kamon.testkit.BaseKamonSpec
-
-import com.typesafe.config.ConfigFactory
-
-import org.scalatest.{ Matchers, WordSpec }
+import kamon.Kamon
 
 // a test fixture mbean
 class Test(val intValues: Seq[Int], val longValues: Seq[Long], val name: String)
@@ -73,10 +69,14 @@ class ExportedMBeanSpec extends BaseKamonSpec("exported-mbean-spec") {
       val longValues: Seq[Long] = for (i ← 0 to 9) yield i.toLong
       val testMBean = new Test(intValues, longValues, "test-fixture")
 
+      val counter = Kamon.metrics.counter("kamon-jmx-test-counter")
+
       Thread.sleep(1000)
 
       for (i ← 0 to 9) {
+        println(s"Loop: $i")
         val longI: Long = i.toLong
+        counter.increment(longI * 10)
         val snapshot = takeSnapshotOf("test-fixture", "kamon-mxbeans")
         snapshot.counter("IntValue").get.count should be(i)
         snapshot.counter("LongValue").get.count should be(longI)
