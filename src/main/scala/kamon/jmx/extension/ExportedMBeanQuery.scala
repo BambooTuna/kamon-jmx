@@ -140,6 +140,7 @@ class ExportedMBeanQuery(
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val log = Logging(system, getClass)
+  println(s"sjmx: ExportedMBeanQuery#apply")
 
   require(
     identifyInterval >= checkInterval,
@@ -172,6 +173,7 @@ class ExportedMBeanQuery(
    * metrics
    */
   def rebuildRecorders(): Unit = {
+    println(s"sjmx: rebuildRecorders")
 
     import collection.JavaConverters._
     val names: Set[ObjectName] = getMBeanNames()
@@ -240,6 +242,7 @@ class ExportedMBean(
   val attrNames: Array[String], val checkInterval: Long)(
     implicit ec: ExecutionContext)
     extends GenericEntityRecorder(instrumentFactory) {
+  println(s"sjmx: ExportedMBean#apply")
 
   import ExportedMBean._
 
@@ -261,6 +264,7 @@ class ExportedMBean(
       mdef ⇒ (mdef.name, makeGauge(mdef))).toMap
 
   def gatherMetrics(): Unit = {
+    println(s"sjmx: gatherMetrics")
     import collection.JavaConverters._
 
     try {
@@ -274,6 +278,11 @@ class ExportedMBean(
         } else if (minMaxCounters.contains(attrName)) {
           val value: Long = toLong(attr.getValue())
           minMaxCounters(attrName).increment(value)
+        } else if (gauges.contains(attrName)) {
+          println(s"sjmx: gatherMetrics#gauges")
+          val value: Long = toLong(attr.getValue())
+          gauges(attrName).record(value)
+          gauges(attrName).refreshValue()
         }
       }
     } catch {
@@ -341,6 +350,7 @@ class ExportedMBean(
         mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
         mdef.valueCollector.get)
     } else if (!mdef.refreshInterval.isDefined) {
+      println(s"sjmx: makeGauge")
 //      gauge(
 //        mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
       Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
