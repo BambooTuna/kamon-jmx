@@ -140,12 +140,6 @@ class ExportedMBeanQuery(
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val log = Logging(system, getClass)
-  println(s"sjmx: ExportedMBeanQuery#apply")
-  println(s"sjmx: jmxQuery: $jmxQuery")
-  println(s"sjmx: attributeConfigs: $attributeConfigs")
-  println(s"sjmx: identifyDelayInterval: $identifyDelayInterval")
-  println(s"sjmx: identifyInterval: $identifyInterval")
-  println(s"sjmx: checkInterval: $checkInterval")
 
   require(
     identifyInterval >= checkInterval,
@@ -178,17 +172,13 @@ class ExportedMBeanQuery(
    * metrics
    */
   def rebuildRecorders(): Unit = {
-    println(s"sjmx: rebuildRecorders")
 
     import collection.JavaConverters._
     val names: Set[ObjectName] = getMBeanNames()
     log.debug("found JMX ObjectNames " + names)
-    println(s"sjmx: found JMX ObjectNames: $names")
     names.filterNot { name ⇒
-      println(s"sjmx: name: $name")
       monitoredBeanNames.exists(_.equals(name))
     }.foreach { name ⇒
-      println(s"sjmx: name#foreach: $name")
       val attrList: AttributeList =
         server.getAttributes(name, attributeNames)
       val attrs: Seq[Attribute] = attrList.asList().asScala
@@ -209,17 +199,13 @@ class ExportedMBeanQuery(
           }
       }.toSeq
 
-      println(s"metricsExtension.entity: name: ${name.getKeyProperty("client-id")}")
-//      val entityName = name.getKeyProperty("client-id")
-      val entityName = "kafka-metrics"
-
       val metricsExtension = kamon.Kamon.metrics
       metricsExtension.entity(
         EntityRecorderFactory(
           "kamon-mxbeans",
           apply(
             system, _, definitions, name, attributeNames, checkInterval)),
-        entityName)
+        name.getKeyProperty("client-id"))
 
       monitoredBeanNames += name
     }
@@ -254,9 +240,6 @@ class ExportedMBean(
   val attrNames: Array[String], val checkInterval: Long)(
     implicit ec: ExecutionContext)
     extends GenericEntityRecorder(instrumentFactory) {
-  println(s"sjmx: ExportedMBean#apply")
-  val counter = Kamon.metrics.counter("exported-mbean-counter")
-  val orgCounter = counter("exported-mbean-counter-org-counter", UnitOfMeasurement.Unknown)
 
   import ExportedMBean._
 
@@ -278,7 +261,6 @@ class ExportedMBean(
       mdef ⇒ (mdef.name, makeGauge(mdef))).toMap
 
   def gatherMetrics(): Unit = {
-    println(s"sjmx: gatherMetrics")
     import collection.JavaConverters._
 
     try {
@@ -292,25 +274,6 @@ class ExportedMBean(
         } else if (minMaxCounters.contains(attrName)) {
           val value: Long = toLong(attr.getValue())
           minMaxCounters(attrName).increment(value)
-        } else if (gauges.contains(attrName)) {
-          val value: Long = toLong(attr.getValue())
-          println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
-
-          println(s"sjmx: increment#exported-mbean-counter: $counter")
-          counter.increment()
-          counter.increment(value)
-
-          println(s"sjmx: increment#exported-mbean-counter-org-counter: $orgCounter")
-          orgCounter.increment()
-          orgCounter.increment(value)
-
-          println(s"sjmx: increment#exported-mbean-counter-every-time: ${Kamon.metrics.counter("exported-mbean-counter-every-time")}")
-          Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
-
-          println(s"sjmx: record#$attrName: ${gauges(attrName)}")
-          gauges(attrName).record(value, value)
-          gauges(attrName).record(value)
-          gauges(attrName).refreshValue()
         }
       }
     } catch {
@@ -374,13 +337,8 @@ class ExportedMBean(
     if (mdef.range.isDefined && !mdef.refreshInterval.isDefined) {
       gauge(mdef.name, mdef.unitOfMeasure, mdef.valueCollector.get)
     } else if (!mdef.range.isDefined) {
-      println(s"sjmx: makeGauge#mdef.range.isDefined")
-      gauge(
-        mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
-        mdef.valueCollector.get)
-//      Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
+      Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
     } else if (!mdef.refreshInterval.isDefined) {
-      println(s"sjmx: makeGauge:mdef.refreshInterval.isDefined")
       gauge(
         mdef.name, mdef.range.get, mdef.unitOfMeasure, mdef.valueCollector.get)
     } else {
