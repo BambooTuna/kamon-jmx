@@ -40,7 +40,7 @@ lazy val sample = (project in file("sample"))
 lazy val root = (project in file("."))
   .settings(
     name := "kamon-jmx",
-    version := "1.0.8-SNAPSHOT",
+    version := "1.0.9sbt publish-SNAPSHOT",
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.11.8", "2.12.8")
   )

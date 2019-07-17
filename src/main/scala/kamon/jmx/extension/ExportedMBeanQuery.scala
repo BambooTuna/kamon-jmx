@@ -247,6 +247,7 @@ class ExportedMBean(
     extends GenericEntityRecorder(instrumentFactory) {
   println(s"sjmx: ExportedMBean#apply")
   val counter = Kamon.metrics.counter("exported-mbean-counter")
+  val orgCounter = counter("exported-mbean-counter-org-counter", UnitOfMeasurement.Unknown)
 
   import ExportedMBean._
 
@@ -286,6 +287,7 @@ class ExportedMBean(
           val value: Long = toLong(attr.getValue())
           println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
           counter.increment(value)
+          orgCounter.increment(value)
           Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
