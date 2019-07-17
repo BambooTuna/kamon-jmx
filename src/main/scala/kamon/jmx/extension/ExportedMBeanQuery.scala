@@ -371,10 +371,10 @@ class ExportedMBean(
       gauge(mdef.name, mdef.unitOfMeasure, mdef.valueCollector.get)
     } else if (!mdef.range.isDefined) {
       println(s"sjmx: makeGauge#mdef.range.isDefined")
-//      gauge(
-//        mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
-//        mdef.valueCollector.get)
-      Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
+      gauge(
+        mdef.name, mdef.refreshInterval.get, mdef.unitOfMeasure,
+        mdef.valueCollector.get)
+//      Kamon.metrics.gauge(mdef.name, mdef.refreshInterval.get)(mdef.valueCollector.get)
     } else if (!mdef.refreshInterval.isDefined) {
       println(s"sjmx: makeGauge:mdef.refreshInterval.isDefined")
       gauge(
