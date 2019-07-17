@@ -287,15 +287,16 @@ class ExportedMBean(
           val value: Long = toLong(attr.getValue())
           println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
 
-          println(s"sjmx: increment#exported-mbean-counter")
+          println(s"sjmx: increment#exported-mbean-counter: $counter")
           counter.increment(value)
 
-          println(s"sjmx: increment#exported-mbean-counter-org-counter")
+          println(s"sjmx: increment#exported-mbean-counter-org-counter: $orgCounter")
           orgCounter.increment(value)
 
-          println(s"sjmx: increment#exported-mbean-counter-every-time")
+          println(s"sjmx: increment#exported-mbean-counter-every-time: ${Kamon.metrics.counter("exported-mbean-counter-every-time")}")
           Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
 
+          println(s"sjmx: record#$attrName: ${gauges(attrName)}")
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
         }
