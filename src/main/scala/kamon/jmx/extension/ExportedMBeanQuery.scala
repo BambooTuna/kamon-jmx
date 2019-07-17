@@ -141,6 +141,7 @@ class ExportedMBeanQuery(
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val log = Logging(system, getClass)
   println(s"sjmx: ExportedMBeanQuery#apply")
+  println(s"sjmx: jmxQuery: $jmxQuery")
   println(s"sjmx: attributeConfigs: $attributeConfigs")
   println(s"sjmx: identifyDelayInterval: $identifyDelayInterval")
   println(s"sjmx: identifyInterval: $identifyInterval")
