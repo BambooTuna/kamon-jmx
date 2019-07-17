@@ -286,9 +286,16 @@ class ExportedMBean(
         } else if (gauges.contains(attrName)) {
           val value: Long = toLong(attr.getValue())
           println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
+
+          println(s"sjmx: increment#exported-mbean-counter")
           counter.increment(value)
+
+          println(s"sjmx: increment#exported-mbean-counter-org-counter")
           orgCounter.increment(value)
+
+          println(s"sjmx: increment#exported-mbean-counter-every-time")
           Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
+
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
         }
