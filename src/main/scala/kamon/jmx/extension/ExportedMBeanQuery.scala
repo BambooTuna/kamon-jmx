@@ -141,6 +141,10 @@ class ExportedMBeanQuery(
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val log = Logging(system, getClass)
   println(s"sjmx: ExportedMBeanQuery#apply")
+  println(s"sjmx: attributeConfigs: $attributeConfigs")
+  println(s"sjmx: identifyDelayInterval: $identifyDelayInterval")
+  println(s"sjmx: identifyInterval: $identifyInterval")
+  println(s"sjmx: checkInterval: $checkInterval")
 
   require(
     identifyInterval >= checkInterval,
@@ -288,15 +292,18 @@ class ExportedMBean(
           println(s"sjmx: gatherMetrics#gauges: $attrName: $value")
 
           println(s"sjmx: increment#exported-mbean-counter: $counter")
+          counter.increment()
           counter.increment(value)
 
           println(s"sjmx: increment#exported-mbean-counter-org-counter: $orgCounter")
+          orgCounter.increment()
           orgCounter.increment(value)
 
           println(s"sjmx: increment#exported-mbean-counter-every-time: ${Kamon.metrics.counter("exported-mbean-counter-every-time")}")
           Kamon.metrics.counter("exported-mbean-counter-every-time").increment(value)
 
           println(s"sjmx: record#$attrName: ${gauges(attrName)}")
+          gauges(attrName).record(value, value)
           gauges(attrName).record(value)
           gauges(attrName).refreshValue()
         }
