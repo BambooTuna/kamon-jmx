@@ -215,7 +215,7 @@ class ExportedMBeanQuery(
           "kamon-mxbeans",
           apply(
             system, _, definitions, name, attributeNames, checkInterval)),
-        name.getKeyProperty("name"))
+        name.getKeyProperty("client-id"))
 
       monitoredBeanNames += name
     }
